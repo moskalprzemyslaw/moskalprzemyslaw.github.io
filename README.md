@@ -34,5 +34,24 @@ I chose Docker to keep services isolated and lightweight:
 4. Spun up the entire Wazuh stack using Docker Compose.
 
 The SIEM dashboard is now live and accessible at `https://192.168.0.106`.
-
 ---
+##  Detection Test: MITRE ATT&CK T1136
+
+To validate the detection pipeline, I simulated unauthorized local account creation on the host server:
+
+1. **Trigger:** Created a test account via CLI (`sudo useradd soc-test-user`).
+2. **Dashboard Overview:** Wazuh immediately captured the spike in Level 8 alerts and classified the technique under *Persistence*.
+   
+   ![Wazuh Dashboard](01-dashboard.png)
+
+3. **Event Correlation:** Filtered the events table to trace privilege escalation and user management actions.
+   
+   ![Wazuh Events Table](02-events.png)
+
+4. **Alert & Payload Triage:** Inspected raw log fields (`useradd` decoder parsed target user `soc-test-user`).
+   
+   ![Event Details Log](03-details-log.png)
+
+5. **MITRE Mapping:** Verified Rule `5902` (Level 8) mapped directly to **T1136.001 - Create Account: Local Account**.
+   
+   ![MITRE Rule Details](04-details-mitre.png)
