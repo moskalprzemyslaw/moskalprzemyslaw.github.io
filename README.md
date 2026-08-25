@@ -1,5 +1,3 @@
-# moskalprzemyslaw.github.io
-Cybersecurity &amp; SOC Analyst Homelab Documentation
 
 
 # Building My SOC Homelab 
