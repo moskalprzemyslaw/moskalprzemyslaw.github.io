@@ -55,3 +55,49 @@ To validate the detection pipeline, I simulated unauthorized local account creat
 5. **MITRE Mapping:** Verified Rule `5902` (Level 8) mapped directly to **T1136.001 - Create Account: Local Account**.
    
    ![MITRE Rule Details](04-details-mitre.png)
+
+---
+
+##  Detection Test: MITRE ATT&CK T1110 (SSH Brute-Force & IPS Defense)
+
+To test event correlation and automated intrusion prevention, I simulated an SSH brute-force attack from a local workstation (`192.168.0.102`) targeting the server (`192.168.0.106`):
+
+1. **Attack Simulation:** Generated multiple invalid SSH login attempts using arbitrary credentials (`fakeadmin`).
+2. **Initial Detection (Level 5):** Wazuh captured repeated individual failed authentications under Rule `5710`.
+   
+   ![Failed SSH Logins](05-ssh-failed-logins.png)
+
+3. **SIEM Rule Correlation (Level 10):** The correlation engine automatically escalated the incident to Level 10 (Rule `2502`) upon detecting multiple consecutive failures within a short window.
+   
+   ![SSH Correlation Event](06-ssh-correlation.png)
+
+4. **MITRE ATT&CK Mapping & Alert Payload:** The correlated event was mapped directly to **T1110 - Brute Force** under the **Credential Access** tactic, capturing the attacker IP:
+
+```json
+{
+  "agent": {
+    "id": "001",
+    "name": "soc-lab-server",
+    "ip": "192.168.0.106"
+  },
+  "rule": {
+    "id": "2502",
+    "level": 10,
+    "description": "syslog: User missed the password more than one time",
+    "mitre": {
+      "id": [
+        "T1110"
+      ],
+      "tactic": [
+        "Credential Access"
+      ],
+      "technique": [
+        "Brute Force"
+      ]
+    }
+  },
+  "decoder": {
+    "name": "sshd"
+  },
+  "full_log": "Aug 25 15:57:21 soc-lab sshd-session[31249]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.0.102"
+}
